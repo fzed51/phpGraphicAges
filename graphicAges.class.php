@@ -18,9 +18,14 @@ class GraphicAges {
 	
 	private $x_px;
 	private $y_px;
+	private $milieu_px;
 	private $marge;
 	private $max_data;
+	private $absysMax;
+	private $fontSize;
+	private $lineHeight;
 	
+	private $ordonnee;
 	private $serie_droite;
 	private $serie_droite_libelle;
 	private $serie_droite_couleur;
@@ -28,15 +33,21 @@ class GraphicAges {
 	private $serie_gauche_libelle;
 	private $serie_gauche_couleur;
 
-
 	const DROITE = 0;
 	const GAUCHE = 1;
 	
-	function __construct($x, $y) {
+	function __construct($x, $y, $marge = 20, $fontSize = 10) {
 		$this->x_px = $x;
+		$this->milieu_px = (int) $x / 2;
 		$this->y_px = $y;
-		$this->marge = 20;
+		$this->marge = $marge;
 		$this->max_data = 0;
+		$this->fontSize = $fontSize;
+		$this->lineHeight = (int) $fontSize * 1.5;
+	}
+	
+	function setOrdonnee($ordonnee){
+		
 	}
 	
 	function addSerie($side, $serie, $libelle="", $couleur=""){
@@ -60,6 +71,7 @@ class GraphicAges {
 				$this->serie_droite_couleur = $couleur;
 				break;			
 			case self::GAUCHE:
+				$this->findMaxData($serie);
 				$this->serie_gauche = $serie;				
 				if($libelle==''){
 					$libelle='GAUCHE';
@@ -76,6 +88,14 @@ class GraphicAges {
 	}
 	
 	function generateIn($fileName) {
+		
+		// 1 -> 2
+		// 9 -> 10
+		// 11 -> 12
+		// 100 -> 110
+		$log = log10($this->max_data)-1;
+		$this->absysMax = ceil($this->max_data / 10^$log) * 10^$log;
+		
 		$fh = fopen($fileName, 'w');
 		$this->fwriteSVG($fh);
 		fclose($fh);
@@ -83,24 +103,49 @@ class GraphicAges {
 	
 	private function fwriteSVG($handle) {
 		fwrite($handle, '<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">');
-		fwrite($handle, "<svg width=\"{$this->x_px}px\" height=\"{$this->y_px}\">");
+		fwrite($handle, "<svg width=\"{$this->x_px}px\" height=\"{$this->y_px}px\" xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" >");
+		$x = $this->x_px - 1;
+		$y = $this->y_px - 1;
+		fwrite($handle, "<rect x=\"1\" y=\"1\" width=\"$x\" height=\"$y\" fill=\"#ffffff\" stroke=\"#000000\" />");
 		$this->fwriteGraph($handle);
 		fwrite($handle, '</svg>');
 	}
 	
 	private function fwriteGraph($handle) {
+		
+		$this->fwriteFondGraph($handle);
 		$this->fwriteRepere($handle);
+		$this->fwriteData($handle);
+		$this->fwriteLibRepere($handle);
+		$this->fwriteLibData($handle);
+		
 	}
 	
 	private function fwriteFondGraph($handle) {
 		fwrite($handle, '<g id="bg">');
-		
+				
 		fwrite($handle, '</g>');
 		
 	}
 	
 	private function fwriteRepere($handle) {
 		fwrite($handle, '<g id="repere">');
+		
+		$x1 = $this->marge;
+		$y1 = $this->y_px - $this->marge -  2 * $this->lineHeight;
+		$x2 = $this->milieu_px - $this->marge;
+		$y2 = $y1;
+		$x3 = $x2;
+		$y3 = $this->marge;
+		fwrite($handle,"<polyline fill=\"none\" stroke=\"#000000\" stroke-width=\"2\" points=\"$x1,$y1 $x2,$y2 $x3,$y3\" />");
+		
+		$x1 = $this->x_px - $this->marge;
+		$y1 = $this->y_px - $this->marge -  2 * $this->lineHeight;
+		$x2 = $this->milieu_px + $this->marge;
+		$y2 = $y1;
+		$x3 = $x2;
+		$y3 = $this->marge;
+		fwrite($handle,"<polyline fill=\"none\" stroke=\"#000000\" stroke-width=\"2\" points=\"$x1,$y1 $x2,$y2 $x3,$y3\" />");
 		
 		fwrite($handle, '</g>');
 	}
@@ -124,6 +169,14 @@ class GraphicAges {
 	}
 	
 	private function findMaxData($serie) {
+		$values = array_values($serie);
+		$maxVal = max($values);
+		$this->max_data = (
+				max([
+					$maxVal, 
+					$this->max_data
+				])
+			);
 	}
-	
+		
 }
