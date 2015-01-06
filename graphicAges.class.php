@@ -114,8 +114,8 @@ class GraphicAges {
 	private function fwriteGraph($handle) {
 		
 		$this->fwriteFondGraph($handle);
-		$this->fwriteRepere($handle);
 		$this->fwriteData($handle);
+		$this->fwriteRepere($handle);
 		$this->fwriteLibRepere($handle);
 		$this->fwriteLibData($handle);
 		
@@ -123,7 +123,20 @@ class GraphicAges {
 	
 	private function fwriteFondGraph($handle) {
 		fwrite($handle, '<g id="bg">');
-				
+		$yh = $this->marge;
+		$yb = (int) $this->y_px - $this->marge -  2 * $this->lineHeight;
+		$x1min = $this->milieu_px - $this->marge;
+		$x1max = $this->marge;
+		$x2min = $this->milieu_px + $this->marge;
+		$x2max = $this->x_px - $this->marge;
+		for($x = $x1min; $x > $x1max; $x += ( $x1max - $x1min) / $this->absysMax){
+			fwrite($handle, "<line x1=\"$x\" y1=\"$yb\" x2=\"$x\" y2=\"$yh\" ".
+				"stroke=\"#808080\" stroke-width=\"1\" stroke-dasharray=\"3,5\" />");
+		}
+		for($x = $x2min; $x < $x2max; $x += ( $x2max - $x2min) / $this->absysMax){
+			fwrite($handle, "<line x1=\"$x\" y1=\"$yb\" x2=\"$x\" y2=\"$yh\" ".
+				"stroke=\"#808080\" stroke-width=\"1\" stroke-dasharray=\"3,5\" />");
+		}
 		fwrite($handle, '</g>');
 		
 	}
@@ -137,7 +150,7 @@ class GraphicAges {
 		$y2 = $y1;
 		$x3 = $x2;
 		$y3 = $this->marge;
-		fwrite($handle,"<polyline fill=\"none\" stroke=\"#000000\" stroke-width=\"2\" points=\"$x1,$y1 $x2,$y2 $x3,$y3\" />");
+		fwrite($handle,"<polyline fill=\"none\" stroke=\"#000000\" stroke-width=\"3\" points=\"$x1,$y1 $x2,$y2 $x3,$y3\" />");
 		
 		$x1 = $this->x_px - $this->marge;
 		$y1 = $this->y_px - $this->marge -  2 * $this->lineHeight;
@@ -145,13 +158,29 @@ class GraphicAges {
 		$y2 = $y1;
 		$x3 = $x2;
 		$y3 = $this->marge;
-		fwrite($handle,"<polyline fill=\"none\" stroke=\"#000000\" stroke-width=\"2\" points=\"$x1,$y1 $x2,$y2 $x3,$y3\" />");
+		fwrite($handle,"<polyline fill=\"none\" stroke=\"#000000\" stroke-width=\"3\" points=\"$x1,$y1 $x2,$y2 $x3,$y3\" />");
 		
 		fwrite($handle, '</g>');
 	}
 	
 	private function fwriteData($handle) {
 		fwrite($handle, '<g id="data">');
+		
+		$yh = $this->marge;
+		$yb = (int) $this->y_px - $this->marge -  2 * $this->lineHeight;
+		$x1min = $this->milieu_px - $this->marge;
+		$x1max = $this->marge;
+		$x2min = $this->milieu_px + $this->marge;
+		$x2max = $this->x_px - $this->marge;
+		$step = ( $yb - $yh ) / count($this->ordonnee);
+		
+		for ($i = 0; $i < count($this->ordonnee); $i++){
+			$l1 = (int) (( $x1min - $x1max ) / $this->absysMax ) * $this->serie_gauche;
+			$h = (int) $step - 4;
+			$x1 = 0;
+			fwrite($handle,"<rect x=  \"400\" y=\"100\" width=\"400\" height=\"200\" fill=\"yellow\" stroke=\"navy\" stroke-width=\"10\" />");
+			fwrite($handle,"<rect x=  \"400\" y=\"100\" width=\"400\" height=\"200\" fill=\"yellow\" stroke=\"navy\" stroke-width=\"10\" />");
+		}
 		
 		fwrite($handle, '</g>');
 	}	
@@ -171,12 +200,10 @@ class GraphicAges {
 	private function findMaxData($serie) {
 		$values = array_values($serie);
 		$maxVal = max($values);
-		$this->max_data = (
-				max([
-					$maxVal, 
-					$this->max_data
-				])
-			);
+		$this->max_data = max([
+				$maxVal, 
+				$this->max_data
+			]);
 	}
 		
 }
