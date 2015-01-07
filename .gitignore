@@ -19,3 +19,14 @@ $RECYCLE.BIN/
 # =========================
 
 nbproject/
+
+
+# =========================
+# Fichier généré
+# =========================
+
+# log d'erreur
+*log.txt
+
+# image dynamique
+*.svg
