@@ -2,7 +2,7 @@
 
 require './graphicAges.class.php';
 
-$graph = new graphicAges(1000, 500);
+$graph = new graphicAges(600, 400, 20, 12);
 $ordonnee = [
 	"0-9",
 	"10-19",
@@ -44,8 +44,8 @@ $serie2 = [
 ];
 $imageFileName = "./graph_ages.svg";
 $graph->setOrdonnee($ordonnee);
-$graph->addSerie(GraphicAges::DROITE, $serie1, 'hommes');
-$graph->addSerie(GraphicAges::GAUCHE, $serie2, 'femmes');
+$graph->addSerie(GraphicAges::DROITE, $serie1, 'hommes (millions)', '#8888ff');
+$graph->addSerie(GraphicAges::GAUCHE, $serie2, 'femmes (millions)', '#ff8888');
 $graph->generateIn($imageFileName);
 
 include('./vue.php');
